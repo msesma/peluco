@@ -1,0 +1,281 @@
+#include <gfxfont.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SPITFT.h>
+#include <Adafruit_SPITFT_Macros.h>
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
+#include <avr/sleep.h>
+#include <avr/power.h>
+
+//BreadBoard
+// pin 7 - Serial clock out (SCLK)
+// pin 6 - Serial data out (DIN)
+// pin 5 - Data/Command select (D/C)
+// pin 4 - LCD chip select (CS)
+// pin 3 - LCD reset (RST)
+//Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
+
+//Peluco Arduino Pro Mini
+// pin 8 - Back Light (GND on)
+// pin 7 - VCC
+//Peluco Blend Micro
+// pin 11 - GND
+// pin 12 - Back Light (GND on)
+// pin 13 - VCC
+//int lcdGnd = 11;
+//int lcdBl = 12;
+//int lcdVcc = 13;
+
+//Peluco Arduino Pro Mini
+// pin 6 - Serial clock out (SCLK)
+// pin 5 - Serial data out (DIN)
+// pin 4 - Data/Command select (D/C)
+// pin 3 - LCD chip select (CS)
+// pin 2- LCD reset (RST)
+
+//Peluco Blend Micro
+// pin A0 - Serial clock out (SCLK)
+// pin A1 - Serial data out (DIN)
+// pin A2 - Data/Command select (D/C)
+// pin A3 - LCD chip select (CS)
+// pin A4 - LCD reset (RST)
+//Adafruit_PCD8544 display = Adafruit_PCD8544(A0, A1, A2, A3, A4);
+
+//Peluco Beetle BLE
+// pin D2 - Serial clock out (SCLK)
+// pin D3 - Serial data out (DIN)
+// pin D4 - Data/Command select (D/C)
+// pin D5 - LCD chip select (CS)
+// pin -- - LCD reset (RST)
+Adafruit_PCD8544 display = Adafruit_PCD8544(2, 3, 4, 5, 14);
+
+// pin 6 - Serial clock out (SCLK)
+// pin 5 - Serial data out (DIN)
+// pin 4 - Data/Command select (D/C)
+
+
+#define NUMFLAKES 10
+#define XPOS 0
+#define YPOS 1
+#define DELTAY 2
+
+#define LOGO16_GLCD_HEIGHT 16
+#define LOGO16_GLCD_WIDTH  16
+
+
+int seconds =0;
+int minutes =0;
+int hours =0;
+int dayOfWeek =0;
+int curDay =1;
+int curMonth =0;
+int curYear =2013;
+const int daysOnMonth[]  ={31,28,31,30,31,30,31,31,30,31,30,31};
+const char monthShortNames[]  = "JanFebMarAprMayJunJulAugSepOctNovDec";
+const char dayShortNames[]  = "MonTueWedThrFriSatSun";
+
+#define DEBUG 1
+
+char indicator = ':';
+char buff3[3];
+char buff41[3];
+char buff42[3];
+
+void setup()   {
+ // Serial.begin(9600);
+
+  //Power on diaplay
+ // pinMode(lcdGnd, OUTPUT); 
+ // pinMode(lcdVcc, OUTPUT); 
+ // pinMode(lcdBl, OUTPUT); 
+//  digitalWrite(lcdBl, HIGH);
+ // digitalWrite(lcdGnd, LOW);
+ // digitalWrite(lcdVcc, HIGH);
+
+  //initialize display with a contrast of 60
+  display.begin(60);
+  delay(500);
+  display.setTextColor(BLACK);
+  
+  // initialize timer1 See http://letsmakerobots.com/node/28278
+  noInterrupts();           // disable all interrupts
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1  = 0;
+
+  OCR1A = 31250;            // compare match register 16MHz/256/2Hz
+  //TCNT1  = 31250;  
+  TCCR1B |= (1 << WGM12);   // CTC mode
+  TCCR1B |= (1 << CS12);    // 256 prescaler 
+  TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
+  //TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
+  
+//  PRR1 |= 1<<PRUSB;
+  interrupts();             // enable all interrupts
+  
+  updateClock();
+}
+
+ISR(TIMER1_COMPA_vect)          // timer compare interrupt service routine
+{
+  updateClock();
+}
+
+void loop() {
+  updateClock();
+  clockToScreen();
+  //clockToSerial();
+//  delay(499);
+  sleepNow();
+}
+
+void clockToScreen(){
+  display.clearDisplay();
+  display.setCursor(6,16);
+  display.setTextSize(2);
+  display.print(formatTimeDigits(hours));
+  display.print(indicator);
+  display.print(formatTimeDigits(minutes));
+  display.setTextSize(1);
+  display.setCursor(72,23);
+  display.println(formatTimeDigits(seconds));
+  display.print(" ");
+  display.print(dayShortStr(dayOfWeek));
+  display.print(" ");
+  display.print(monthShortStr(curMonth));
+  display.print(" ");
+  display.print(curDay);
+  display.display();
+}
+
+void clockToSerial(){
+  Serial.print(formatTimeDigits(hours));
+  Serial.print(indicator);
+  Serial.print(formatTimeDigits(minutes));
+  Serial.print(' ');
+  Serial.print(formatTimeDigits(seconds));
+  Serial.print(' ');
+  Serial.print(dayOfWeek);
+  Serial.print(' ');
+  Serial.print(curDay);
+  Serial.print(' ');
+  Serial.print(curMonth);
+  Serial.print(' ');
+  Serial.println(curYear);
+}
+
+char* formatTimeDigits(int num)
+{
+  buff3[0] = '0' + (num / 10);
+  buff3[1] = '0' + (num % 10);
+  buff3[2] = 0;
+  return buff3;
+}
+
+void updateClock(){
+  if (indicator == ':')
+    indicator = ' ';
+  else{
+    indicator = ':';
+        if (Serial.available() > 0) {
+        //FIXME make a more robust time read method
+	hours = (Serial.read()-48)*10+ Serial.read()-48;
+        Serial.read();
+        minutes = (Serial.read()-48)*10+ Serial.read()-48;
+/*        
+        Serial.read();
+        dayOfWeek = (Serial.read()-48);
+        Serial.read();
+        curDay = (Serial.read()-48)*10+ Serial.read()-48;
+        Serial.read();
+        curMonth = (Serial.read()-48)*10+ Serial.read()-48;
+        Serial.read();
+        curYear = 2000 + (Serial.read()-48)*10+ Serial.read()-48;
+        seconds = 0;
+*/        
+        while (Serial.read() != -1) {};//FLUSH
+    }
+    seconds++;
+    if (seconds == 60){
+      seconds = 0;
+      minutes++;
+      if (minutes == 60){
+        minutes = 0;
+        hours++;
+        if (hours == 24){
+          hours = 0;
+          dayOfWeek++;
+          if (dayOfWeek == 7)
+            dayOfWeek = 0;
+          uint8_t monthDays = daysOnMonth[curMonth];
+          boolean leap = ( ((curYear)>0) && !((curYear)%4) && ( ((curYear)%100) || !((curYear)%400) ) );
+          if (curMonth == 1 && leap)
+            monthDays++;
+          curDay++;  
+          if (curDay > monthDays){
+            curDay = 1;
+            curMonth++;
+            if (curMonth == 12){
+              curMonth = 0;
+              curYear++;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+char*  monthShortStr(uint8_t month)
+{
+   for (int i=0; i < 3; i++)      
+      buff41[i] = monthShortNames[month*3 + i];  
+   buff41[3] = '\0'; 
+   return buff41;
+}
+
+char* dayShortStr(uint8_t day) 
+{
+   for (int i=0; i < 3; i++)      
+      buff42[i] = dayShortNames[day*3 + i];  
+   buff42[3] = '\0'; 
+   return buff42;
+}
+
+void sleepNow()         // here we put the arduino to sleep
+{
+//  http://donalmorrissey.blogspot.com.es/2011/11/sleeping-arduino-part-4-wake-up-via.html
+     /* The 5 different modes are:
+     *     SLEEP_MODE_IDLE         -the least power savings
+     *     SLEEP_MODE_ADC
+     *     SLEEP_MODE_PWR_SAVE
+     *     SLEEP_MODE_STANDBY
+     *     SLEEP_MODE_PWR_DOWN     -the most power savings
+     */
+  //FIXME only SLEEP_MODE_IDLE is supported. Maybe using external interrupts driven by a autogenerated PWM...
+  set_sleep_mode(SLEEP_MODE_IDLE);
+  sleep_enable();
+  /* Disable all of the unused peripherals. This will reduce power
+   * consumption further and, more importantly, some of these
+   * peripherals may generate interrupts that will wake our Arduino from
+   * sleep!
+   */
+  power_adc_disable();
+  power_spi_disable();
+  power_timer0_disable();
+  power_timer2_disable();
+  power_twi_disable();  
+  /* Now enter sleep mode. */
+  sleep_mode();
+  /* The program will continue from here after the timer timeout*/
+  sleep_disable(); /* First thing to do is disable sleep. */
+  /* Re-enable the peripherals. */
+  power_all_enable();
+}
+
+void log(String text){
+#ifdef  DEBUG
+  Serial.println(text);
+#endif
+}
