@@ -1,31 +1,8 @@
-#include <gfxfont.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SPITFT.h>
-#include <Adafruit_SPITFT_Macros.h>
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
-
-//BreadBoard
-// pin 7 - Serial clock out (SCLK)
-// pin 6 - Serial data out (DIN)
-// pin 5 - Data/Command select (D/C)
-// pin 4 - LCD chip select (CS)
-// pin 3 - LCD reset (RST)
-//Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
-
-//Peluco Arduino Pro Mini
-// pin 8 - Back Light (GND on)
-// pin 7 - VCC
-//Peluco Blend Micro
-// pin 11 - GND
-// pin 12 - Back Light (GND on)
-// pin 13 - VCC
-//int lcdGnd = 11;
-//int lcdBl = 12;
-//int lcdVcc = 13;
 
 //Peluco Arduino Pro Mini
 // pin 6 - Serial clock out (SCLK)
@@ -34,26 +11,13 @@
 // pin 3 - LCD chip select (CS)
 // pin 2- LCD reset (RST)
 
-//Peluco Blend Micro
-// pin A0 - Serial clock out (SCLK)
-// pin A1 - Serial data out (DIN)
-// pin A2 - Data/Command select (D/C)
-// pin A3 - LCD chip select (CS)
-// pin A4 - LCD reset (RST)
-//Adafruit_PCD8544 display = Adafruit_PCD8544(A0, A1, A2, A3, A4);
-
 //Peluco Beetle BLE
 // pin D2 - Serial clock out (SCLK)
 // pin D3 - Serial data out (DIN)
 // pin D4 - Data/Command select (D/C)
 // pin D5 - LCD chip select (CS)
-// pin -- - LCD reset (RST)
+// pin A0 - LCD reset (RST)
 Adafruit_PCD8544 display = Adafruit_PCD8544(2, 3, 4, 5, 14);
-
-// pin 6 - Serial clock out (SCLK)
-// pin 5 - Serial data out (DIN)
-// pin 4 - Data/Command select (D/C)
-
 
 #define NUMFLAKES 10
 #define XPOS 0
@@ -62,7 +26,6 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(2, 3, 4, 5, 14);
 
 #define LOGO16_GLCD_HEIGHT 16
 #define LOGO16_GLCD_WIDTH  16
-
 
 int seconds =0;
 int minutes =0;
@@ -83,18 +46,8 @@ char buff41[3];
 char buff42[3];
 
 void setup()   {
- // Serial.begin(9600);
-
-  //Power on diaplay
- // pinMode(lcdGnd, OUTPUT); 
- // pinMode(lcdVcc, OUTPUT); 
- // pinMode(lcdBl, OUTPUT); 
-//  digitalWrite(lcdBl, HIGH);
- // digitalWrite(lcdGnd, LOW);
- // digitalWrite(lcdVcc, HIGH);
-
-  //initialize display with a contrast of 60
-  display.begin(60);
+  //initialize display with a contrast of 50
+  display.begin(50);
   delay(500);
   display.setTextColor(BLACK);
   
@@ -105,13 +58,21 @@ void setup()   {
   TCNT1  = 0;
 
   OCR1A = 31250;            // compare match register 16MHz/256/2Hz
-  //TCNT1  = 31250;  
   TCCR1B |= (1 << WGM12);   // CTC mode
   TCCR1B |= (1 << CS12);    // 256 prescaler 
   TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
-  //TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
-  
-//  PRR1 |= 1<<PRUSB;
+  interrupts();             // enable all interrupts
+
+    // initialize timer1 
+  noInterrupts();           // disable all interrupts
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1  = 0;
+
+  OCR1A = 62500;            // compare match register 16MHz/256/2Hz
+  TCCR1B |= (1 << WGM12);   // CTC mode
+  TCCR1B |= (1 << CS12);    // 256 prescaler 
+  TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
   interrupts();             // enable all interrupts
   
   updateClock();
@@ -126,7 +87,7 @@ void loop() {
   updateClock();
   clockToScreen();
   //clockToSerial();
-//  delay(499);
+  //delay(499);
   sleepNow();
 }
 
@@ -178,24 +139,7 @@ void updateClock(){
     indicator = ' ';
   else{
     indicator = ':';
-        if (Serial.available() > 0) {
-        //FIXME make a more robust time read method
-	hours = (Serial.read()-48)*10+ Serial.read()-48;
-        Serial.read();
-        minutes = (Serial.read()-48)*10+ Serial.read()-48;
-/*        
-        Serial.read();
-        dayOfWeek = (Serial.read()-48);
-        Serial.read();
-        curDay = (Serial.read()-48)*10+ Serial.read()-48;
-        Serial.read();
-        curMonth = (Serial.read()-48)*10+ Serial.read()-48;
-        Serial.read();
-        curYear = 2000 + (Serial.read()-48)*10+ Serial.read()-48;
-        seconds = 0;
-*/        
-        while (Serial.read() != -1) {};//FLUSH
-    }
+    setTimeFromSerial(); 
     seconds++;
     if (seconds == 60){
       seconds = 0;
@@ -278,4 +222,25 @@ void log(String text){
 #ifdef  DEBUG
   Serial.println(text);
 #endif
+}
+
+void setTimeFromSerial(){
+  if (Serial.available() > 0) {
+    //FIXME make a more robust time read method
+	  hours = (Serial.read()-48)*10+ Serial.read()-48;
+    Serial.read();
+    minutes = (Serial.read()-48)*10+ Serial.read()-48;
+/*        
+        Serial.read();
+        dayOfWeek = (Serial.read()-48);
+        Serial.read();
+        curDay = (Serial.read()-48)*10+ Serial.read()-48;
+        Serial.read();
+        curMonth = (Serial.read()-48)*10+ Serial.read()-48;
+        Serial.read();
+        curYear = 2000 + (Serial.read()-48)*10+ Serial.read()-48;
+        seconds = 0;
+*/        
+        while (Serial.read() != -1) {};//FLUSH
+  }
 }
