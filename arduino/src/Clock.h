@@ -1,5 +1,5 @@
-#ifndef _MAIN_H
-#define _MAIN_H
+#ifndef _CLOCK_H
+#define _CLOCK_H
 
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
