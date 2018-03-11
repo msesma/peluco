@@ -22,30 +22,6 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(2, 3, 4, 5, 14);
 
 Clock clock = Clock(& display);
 
-#define NUMFLAKES 10
-#define XPOS 0
-#define YPOS 1
-#define DELTAY 2
-
-#define LOGO16_GLCD_HEIGHT 16
-#define LOGO16_GLCD_WIDTH  16
-
-int seconds =0;
-int minutes =0;
-int hours =0;
-int dayOfWeek =0;
-int curDay =1;
-int curMonth =0;
-int curYear =2013;
-const int daysOnMonth[]  ={31,28,31,30,31,30,31,31,30,31,30,31};
-
-#define DEBUG 1
-
-char indicator = ':';
-char buff3[3];
-char buff41[3];
-char buff42[3];
-
 void setup()   {
   //initialize display with a contrast of 50
   display.begin(50);
@@ -65,102 +41,19 @@ void setup()   {
   TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
   interrupts();             // enable all interrupts
 
-  updateClock();
+  clock.updateClock();
 }
 
 ISR(TIMER1_COMPA_vect)          // timer compare interrupt service routine
 {
-  updateClock();
+  clock.updateClock();
 }
 
 void loop() {
-  updateClock();
-  clockToScreen();
-  //clockToSerial();
-  //delay(499);
+  clock.updateClock();
+  clock.clockToScreen();
   sleepNow();
 }
-
-void clockToScreen(){
-  display.clearDisplay();
-  display.setCursor(6,16);
-  display.setTextSize(2);
-  display.print(formatTimeDigits(hours));
-  display.print(indicator);
-  display.print(formatTimeDigits(minutes));
-  display.setTextSize(1);
-  display.setCursor(72,23);
-  display.println(formatTimeDigits(seconds));
-  display.print(" ");
-  display.print(clock.dayShortStr(dayOfWeek));
-  display.print(" ");
-  display.print(clock.monthShortStr(curMonth));
-  display.print(" ");
-  display.print(curDay);
-  display.display();
-}
-
-void clockToSerial(){
-  Serial.print(formatTimeDigits(hours));
-  Serial.print(indicator);
-  Serial.print(formatTimeDigits(minutes));
-  Serial.print(' ');
-  Serial.print(formatTimeDigits(seconds));
-  Serial.print(' ');
-  Serial.print(dayOfWeek);
-  Serial.print(' ');
-  Serial.print(curDay);
-  Serial.print(' ');
-  Serial.print(curMonth);
-  Serial.print(' ');
-  Serial.println(curYear);
-}
-
-char* formatTimeDigits(int num)
-{
-  buff3[0] = '0' + (num / 10);
-  buff3[1] = '0' + (num % 10);
-  buff3[2] = 0;
-  return buff3;
-}
-
-void updateClock(){
-  if (indicator == ':')
-    indicator = ' ';
-  else{
-    indicator = ':';
-    setTimeFromSerial(); 
-    seconds++;
-    if (seconds == 60){
-      seconds = 0;
-      minutes++;
-      if (minutes == 60){
-        minutes = 0;
-        hours++;
-        if (hours == 24){
-          hours = 0;
-          dayOfWeek++;
-          if (dayOfWeek == 7)
-            dayOfWeek = 0;
-          uint8_t monthDays = daysOnMonth[curMonth];
-          boolean leap = ( ((curYear)>0) && !((curYear)%4) && ( ((curYear)%100) || !((curYear)%400) ) );
-          if (curMonth == 1 && leap)
-            monthDays++;
-          curDay++;  
-          if (curDay > monthDays){
-            curDay = 1;
-            curMonth++;
-            if (curMonth == 12){
-              curMonth = 0;
-              curYear++;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 
 void sleepNow()         // here we put the arduino to sleep
 {
@@ -191,31 +84,4 @@ void sleepNow()         // here we put the arduino to sleep
   sleep_disable(); /* First thing to do is disable sleep. */
   /* Re-enable the peripherals. */
   power_all_enable();
-}
-
-void log(String text){
-#ifdef  DEBUG
-  Serial.println(text);
-#endif
-}
-
-void setTimeFromSerial(){
-  if (Serial.available() > 0) {
-    //FIXME make a more robust time read method
-	  hours = (Serial.read()-48)*10+ Serial.read()-48;
-    Serial.read();
-    minutes = (Serial.read()-48)*10+ Serial.read()-48;
-/*        
-        Serial.read();
-        dayOfWeek = (Serial.read()-48);
-        Serial.read();
-        curDay = (Serial.read()-48)*10+ Serial.read()-48;
-        Serial.read();
-        curMonth = (Serial.read()-48)*10+ Serial.read()-48;
-        Serial.read();
-        curYear = 2000 + (Serial.read()-48)*10+ Serial.read()-48;
-        seconds = 0;
-*/        
-        while (Serial.read() != -1) {};//FLUSH
-  }
 }

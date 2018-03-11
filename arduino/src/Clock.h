@@ -12,13 +12,17 @@ public:
 
     Clock(Adafruit_PCD8544 *display);
 
-    String monthShortStr(uint8_t month);
+    void clockToScreen();
 
-    String dayShortStr(uint8_t day);
+    void updateClock();
 
 private:    
 
-    Adafruit_PCD8544 *_display;
+    Adafruit_PCD8544 *displayPtr;
+
+    String monthShortStr(uint8_t month);
+
+    String dayShortStr(uint8_t day);
 
 };
 

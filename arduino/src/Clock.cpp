@@ -3,14 +3,79 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 
+class Adafruit_PCD8544;
 
-//const int daysOnMonth[]  ={31,28,31,30,31,30,31,31,30,31,30,31};
-const String monthShortNames[]  = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-const String dayShortNames[]  = {"Mon","Tue","Wed","Thr","Fri","Sat","Sun"};
+int seconds =0;
+int minutes =0;
+int hours =0;
+int dayOfWeek =0;
+int curDay =1;
+int curMonth =0;
+int curYear =2018;
+char indicator = ':';
+const int daysOnMonth[12]  ={31,28,31,30,31,30,31,31,30,31,30,31};
+const String monthShortNames[12]  = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+const String dayShortNames[7]  = {"Mon","Tue","Wed","Thr","Fri","Sat","Sun"};
+
 
 Clock::Clock(Adafruit_PCD8544 *display)
 {
-    _display = display;
+    displayPtr = display;
+}
+
+void Clock::clockToScreen(){
+  displayPtr->clearDisplay();
+  displayPtr->setCursor(6,16);
+  displayPtr->setTextSize(2);
+  displayPtr->print(String(hours));
+  displayPtr->print(indicator);
+  displayPtr->print(String(minutes));
+  displayPtr->setTextSize(1);
+  displayPtr->setCursor(72,23);
+  displayPtr->println(String(seconds));
+  displayPtr->print(" ");
+  displayPtr->print(dayShortStr(dayOfWeek));
+  displayPtr->print(" ");
+  displayPtr->print(monthShortStr(curMonth));
+  displayPtr->print(" ");
+  displayPtr->print(curDay);
+  displayPtr->display();
+}
+
+void Clock::updateClock(){
+  if (indicator == ':')
+    indicator = ' ';
+  else{
+    indicator = ':';
+    seconds++;
+    if (seconds == 60){
+      seconds = 0;
+      minutes++;
+      if (minutes == 60){
+        minutes = 0;
+        hours++;
+        if (hours == 24){
+          hours = 0;
+          dayOfWeek++;
+          if (dayOfWeek == 7)
+            dayOfWeek = 0;
+          uint8_t monthDays = daysOnMonth[curMonth];
+          boolean leap = ( ((curYear)>0) && !((curYear)%4) && ( ((curYear)%100) || !((curYear)%400) ) );
+          if (curMonth == 1 && leap)
+            monthDays++;
+          curDay++;  
+          if (curDay > monthDays){
+            curDay = 1;
+            curMonth++;
+            if (curMonth == 12){
+              curMonth = 0;
+              curYear++;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 String Clock::monthShortStr(uint8_t month)
