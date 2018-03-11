@@ -16,24 +16,27 @@ Clock clock = Clock(& display);
 
 Energy energy = Energy();
 
-void setup()   {
-  //initialize display with a contrast of 50
-  display.begin(50);
-  delay(500);
-  display.setTextColor(BLACK);
-  
+void setup()
+{
+  initDisplay();
   energy.setInterrupts();
-
   clock.updateClock();
 }
 
-void loop() {
-  //clock.updateClock();
+void loop() 
+{
   clock.clockToScreen();
   energy.sleepNow();
 }
 
-ISR(TIMER1_COMPA_vect)          // timer compare interrupt service routine
+ISR(TIMER1_COMPA_vect) // timer compare interrupt service routine
 {
   clock.updateClock();
+}
+
+void initDisplay()
+{
+  display.begin(50); //initialize display with a contrast of 50
+  delay(500);
+  display.setTextColor(BLACK);
 }

@@ -24,6 +24,8 @@ private:
 
     String dayShortStr(uint8_t day);
 
+    String formatDigits(int num);
+
 };
 
 #endif

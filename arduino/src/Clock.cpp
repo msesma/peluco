@@ -23,16 +23,17 @@ Clock::Clock(Adafruit_PCD8544 *display)
     displayPtr = display;
 }
 
-void Clock::clockToScreen(){
+void Clock::clockToScreen()
+{
   displayPtr->clearDisplay();
   displayPtr->setCursor(6,16);
   displayPtr->setTextSize(2);
-  displayPtr->print(String(hours));
+  displayPtr->print(formatDigits(hours));
   displayPtr->print(indicator);
-  displayPtr->print(String(minutes));
+  displayPtr->print(formatDigits(minutes));
   displayPtr->setTextSize(1);
   displayPtr->setCursor(72,23);
-  displayPtr->println(String(seconds));
+  displayPtr->println(formatDigits(seconds));
   displayPtr->print(" ");
   displayPtr->print(dayShortStr(dayOfWeek));
   displayPtr->print(" ");
@@ -42,7 +43,14 @@ void Clock::clockToScreen(){
   displayPtr->display();
 }
 
-void Clock::updateClock(){
+String Clock::formatDigits(int num){
+    char buffer[2];
+    sprintf(buffer, "%02d", num); 
+    return buffer;
+}
+
+void Clock::updateClock()
+{
   if (indicator == ':')
     indicator = ' ';
   else{
@@ -57,19 +65,17 @@ void Clock::updateClock(){
         if (hours == 24){
           hours = 0;
           dayOfWeek++;
-          if (dayOfWeek == 7)
-            dayOfWeek = 0;
+          if (dayOfWeek == 7) dayOfWeek = 0;
           uint8_t monthDays = daysOnMonth[curMonth];
           boolean leap = ( ((curYear)>0) && !((curYear)%4) && ( ((curYear)%100) || !((curYear)%400) ) );
-          if (curMonth == 1 && leap)
-            monthDays++;
+          if (curMonth == 1 && leap) monthDays++;
           curDay++;  
           if (curDay > monthDays){
             curDay = 1;
             curMonth++;
             if (curMonth == 12){
               curMonth = 0;
-              curYear++;
+              curYear++;   
             }
           }
         }
