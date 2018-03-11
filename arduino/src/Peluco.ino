@@ -3,6 +3,7 @@
 #include <Adafruit_PCD8544.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
+#include "Clock.h"
 
 //Peluco Arduino Pro Mini
 // pin 6 - Serial clock out (SCLK)
@@ -18,6 +19,8 @@
 // pin D5 - LCD chip select (CS)
 // pin A0 - LCD reset (RST)
 Adafruit_PCD8544 display = Adafruit_PCD8544(2, 3, 4, 5, 14);
+
+Clock clock = Clock(& display);
 
 #define NUMFLAKES 10
 #define XPOS 0
@@ -35,8 +38,6 @@ int curDay =1;
 int curMonth =0;
 int curYear =2013;
 const int daysOnMonth[]  ={31,28,31,30,31,30,31,31,30,31,30,31};
-const char monthShortNames[]  = "JanFebMarAprMayJunJulAugSepOctNovDec";
-const char dayShortNames[]  = "MonTueWedThrFriSatSun";
 
 #define DEBUG 1
 
@@ -63,7 +64,7 @@ void setup()   {
   TCCR1B |= (1 << CS12);    // 256 prescaler 
   TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
   interrupts();             // enable all interrupts
-  
+
   updateClock();
 }
 
@@ -91,9 +92,9 @@ void clockToScreen(){
   display.setCursor(72,23);
   display.println(formatTimeDigits(seconds));
   display.print(" ");
-  display.print(dayShortStr(dayOfWeek));
+  display.print(clock.dayShortStr(dayOfWeek));
   display.print(" ");
-  display.print(monthShortStr(curMonth));
+  display.print(clock.monthShortStr(curMonth));
   display.print(" ");
   display.print(curDay);
   display.display();
@@ -160,21 +161,6 @@ void updateClock(){
   }
 }
 
-char*  monthShortStr(uint8_t month)
-{
-   for (int i=0; i < 3; i++)      
-      buff41[i] = monthShortNames[month*3 + i];  
-   buff41[3] = '\0'; 
-   return buff41;
-}
-
-char* dayShortStr(uint8_t day) 
-{
-   for (int i=0; i < 3; i++)      
-      buff42[i] = dayShortNames[day*3 + i];  
-   buff42[3] = '\0'; 
-   return buff42;
-}
 
 void sleepNow()         // here we put the arduino to sleep
 {
