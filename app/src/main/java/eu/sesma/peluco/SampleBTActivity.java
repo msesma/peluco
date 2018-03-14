@@ -9,6 +9,8 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import eu.sesma.peluco.bt.BlunoLibrary;
+
 public class SampleBTActivity extends BlunoLibrary {
 	private Button buttonScan;
 	private Button buttonSerialSend;
