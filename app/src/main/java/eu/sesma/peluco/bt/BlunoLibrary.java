@@ -18,6 +18,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +29,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import eu.sesma.peluco.R;
 
@@ -107,9 +110,11 @@ public class BlunoLibrary {
     public static final String CommandUUID = "0000dfb2-0000-1000-8000-00805f9b34fb";
     public static final String ModelNumberStringUUID = "00002a24-0000-1000-8000-00805f9b34fb";
 
-    private final Activity activity;
+    private final AppCompatActivity activity;
 
-    public BlunoLibrary(Activity activity) {
+    @Inject
+    public BlunoLibrary(AppCompatActivity
+            activity) {
         this.activity = activity;
     }
 
