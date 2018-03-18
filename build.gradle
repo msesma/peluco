@@ -27,6 +27,7 @@ ext {
     constraint = '1.0.2'
 
     job_dispatcher = '0.5.2'
+    dexter = '4.2.0'
 
     butterknife = '8.6.0'
     dagger = '2.5'
