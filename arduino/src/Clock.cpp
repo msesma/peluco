@@ -25,7 +25,7 @@ Clock::Clock(Adafruit_PCD8544 *display)
 
 void Clock::clockToScreen()
 {
-  displayPtr->clearDisplay();
+  //displayPtr->clearDisplay();
   displayPtr->setCursor(6,16);
   displayPtr->setTextSize(2);
   displayPtr->print(formatDigits(hours));
@@ -40,7 +40,7 @@ void Clock::clockToScreen()
   displayPtr->print(monthShortStr(curMonth));
   displayPtr->print(" ");
   displayPtr->print(curDay);
-  displayPtr->display();
+  //displayPtr->display();
 }
 
 String Clock::formatDigits(int num){

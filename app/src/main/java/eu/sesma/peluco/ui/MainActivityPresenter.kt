@@ -11,7 +11,7 @@ constructor(val blunoLibrary: BlunoLibrary) {
 
     companion object {
         private val TAG = MainActivityPresenter::class.simpleName
-        private const val BAUDRATE = 115200
+        private const val BAUDRATE = 9600
     }
 
     private var decorator: MainActivityUserInterface? = null

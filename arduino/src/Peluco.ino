@@ -3,6 +3,7 @@
 #include <Adafruit_PCD8544.h>
 #include "Clock.h"
 #include "Energy.h"
+#include "Parser.h"
 
 //Peluco Beetle BLE
 // pin D2 - Serial clock out (SCLK)
@@ -12,8 +13,8 @@
 // pin A0 - LCD reset (RST)
 Adafruit_PCD8544 display = Adafruit_PCD8544(2, 3, 4, 5, 14);
 
-Clock clock = Clock(& display);
-
+Clock clock = Clock(&display);
+Parser parser = Parser(&display);
 Energy energy = Energy();
 
 void setup()
@@ -21,11 +22,21 @@ void setup()
   initDisplay();
   energy.setInterrupts();
   clock.updateClock();
+  Serial.begin(9600);
 }
 
 void loop() 
 {
+  display.clearDisplay();
+    if (Serial.available())
+    {
+        String data = Serial.readString();
+        Serial.print(data);
+        parser.onReceive(data);
+    }
+  //String data = bt.receive();
   clock.clockToScreen();
+  display.display();
   energy.sleepNow();
 }
 

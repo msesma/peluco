@@ -1,7 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 27
@@ -11,7 +10,6 @@ android {
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -30,40 +28,16 @@ android {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     compile "com.android.support:design:$support"
     compile "com.android.support:support-annotations:$support"
     compile "com.android.support.constraint:constraint-layout:$constraint"
 
-    compile 'com.firebase:firebase-jobdispatcher:0.5.2'
+    compile "com.firebase:firebase-jobdispatcher:$job_dispatcher"
 
     kapt "com.jakewharton:butterknife-compiler:$butterknife"
     compile "com.jakewharton:butterknife:$butterknife"
     kapt "com.google.dagger:dagger-compiler:$dagger"
     compile "com.google.dagger:dagger:$dagger"
-
-    testCompile "junit:junit:$junit"
-    testCompile "org.robolectric:robolectric:$robolectric"
-    testCompile("com.squareup.assertj:assertj-android:$assertj") {
-        exclude module: 'support-annotations'
-    }
-    testCompile "org.mockito:mockito-core:$mockito"
-    testCompile "commons-io:commons-io:$commons"
-
-    androidTestCompile("com.android.support.test:runner:$runner") {
-        exclude module: 'support-annotations'
-    }
-    androidTestCompile("com.android.support.test.espresso:espresso-core:$espresso") {
-        exclude module: 'support-annotations'
-    }
-    androidTestCompile("com.android.support.test.espresso:espresso-intents:$espresso") {
-        exclude module: 'support-annotations'
-    }
-    androidTestCompile("com.android.support.test.espresso:espresso-contrib:$espresso") {
-        exclude group: 'com.android.support', module: 'appcompat-v7'
-        exclude group: 'com.android.support', module: 'support-v4'
-        exclude module: 'recyclerview-v7'
-        exclude module: 'support-annotations'
-        exclude module: 'design'
-    }
 }
