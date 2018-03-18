@@ -7,7 +7,8 @@
 
 class Adafruit_PCD8544;
 
-class Clock {
+class Clock 
+{
 public:
 
     Clock(Adafruit_PCD8544 *display);

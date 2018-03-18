@@ -14,6 +14,8 @@ public:
 
     String onReceive(String Data);
 
+    void log();
+
 private:
 
     Adafruit_PCD8544 *displayPtr;

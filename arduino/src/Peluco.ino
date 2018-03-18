@@ -11,6 +11,7 @@
 // pin D4 - Data/Command select (D/C)
 // pin D5 - LCD chip select (CS)
 // pin A0 - LCD reset (RST)
+
 Adafruit_PCD8544 display = Adafruit_PCD8544(2, 3, 4, 5, 14);
 
 Clock clock = Clock(&display);
@@ -28,13 +29,13 @@ void setup()
 void loop() 
 {
   display.clearDisplay();
-    if (Serial.available())
-    {
-        String data = Serial.readString();
-        Serial.print(data);
-        parser.onReceive(data);
-    }
-  //String data = bt.receive();
+  if (Serial.available())
+  {  
+    String data = Serial.readString();
+    Serial.print(data);
+    parser.onReceive(data);
+  }
+  parser.log();
   clock.clockToScreen();
   display.display();
   energy.sleepNow();
