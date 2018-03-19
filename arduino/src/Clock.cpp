@@ -31,7 +31,7 @@ Clock::Clock(Adafruit_PCD8544 *display)
 
 void Clock::clockToScreen()
 {
-  timeDate* = localtime(&now);
+  //timeDate* = localtime(&now);
   displayPtr->setCursor(6,16);
   displayPtr->setTextSize(2);
   displayPtr->print(formatDigits(hours));
