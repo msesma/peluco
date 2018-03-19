@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <time.h>
 #include "Clock.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
@@ -12,6 +13,11 @@ int dayOfWeek =0;
 int curDay =1;
 int curMonth =0;
 int curYear =2018;
+
+//https://en.wikipedia.org/wiki/C_date_and_time_functions
+time_t     now;
+struct tm  timeDate;
+
 char indicator = ':';
 const int daysOnMonth[12]  ={31,28,31,30,31,30,31,31,30,31,30,31};
 const String monthShortNames[12]  = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
@@ -25,7 +31,7 @@ Clock::Clock(Adafruit_PCD8544 *display)
 
 void Clock::clockToScreen()
 {
-  //displayPtr->clearDisplay();
+  timeDate* = localtime(&now);
   displayPtr->setCursor(6,16);
   displayPtr->setTextSize(2);
   displayPtr->print(formatDigits(hours));
@@ -40,7 +46,6 @@ void Clock::clockToScreen()
   displayPtr->print(monthShortStr(curMonth));
   displayPtr->print(" ");
   displayPtr->print(curDay);
-  //displayPtr->display();
 }
 
 String Clock::formatDigits(int num){
@@ -82,6 +87,11 @@ void Clock::updateClock()
       }
     }
   }
+}
+
+void Clock::adjustClock(long epoch)
+{
+  now = epoch;
 }
 
 String Clock::monthShortStr(uint8_t month)

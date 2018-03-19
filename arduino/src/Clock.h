@@ -17,6 +17,8 @@ public:
 
     void updateClock();
 
+    void adjustClock(long epoch);
+
 private:    
 
     Adafruit_PCD8544 *displayPtr;
