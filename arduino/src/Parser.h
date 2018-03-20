@@ -12,7 +12,7 @@ public:
 
     Parser(Adafruit_PCD8544 *display);
 
-    String onReceive(String Data);
+    long onReceive(String json);
 
     void log();
 

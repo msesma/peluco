@@ -3,6 +3,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 //https://arduinojson.org/doc/
+//https://github.com/bblanchon/ArduinoJson
 #include <ArduinoJson.h>
 
 class Adafruit_PCD8544;
@@ -14,13 +15,17 @@ Parser::Parser(Adafruit_PCD8544 *display)
     displayPtr = display;
 }
 
-String Parser::onReceive(String data)
+long Parser::onReceive(String json)
 {
-    if (data.length() > 0) 
+    if (json.length() > 0) 
     {
-       logData = data;
+       logData = json;
+       StaticJsonBuffer<200> jsonBuffer;
+        JsonObject& root = jsonBuffer.parseObject(json);
+        long time = root["time"];
+        return time;
     }
-    return data;
+    return 0;
 }
 
 void Parser::log()

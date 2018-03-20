@@ -22,7 +22,7 @@ void setup()
 {
   initDisplay();
   energy.setInterrupts();
-  clock.updateClock();
+  clock.adjustClock(1521573389); //TODO Remove
   Serial.begin(9600);
 }
 
@@ -31,9 +31,11 @@ void loop()
   display.clearDisplay();
   if (Serial.available())
   {  
-    String data = Serial.readString();
-    Serial.print(data);
-    parser.onReceive(data);
+    String json = Serial.readString();
+    //Serial.print(data);
+    long time = parser.onReceive(json);
+    if (time !=0 )
+      clock.adjustClock(time);
   }
   parser.log();
   clock.clockToScreen();

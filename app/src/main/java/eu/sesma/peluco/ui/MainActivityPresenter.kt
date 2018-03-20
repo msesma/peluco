@@ -1,6 +1,7 @@
 package eu.sesma.peluco.ui
 
 import android.content.Intent
+import android.util.Log
 import eu.sesma.peluco.bt.BlunoLibrary
 import java.util.*
 import javax.inject.Inject
@@ -22,7 +23,9 @@ constructor(val blunoLibrary: BlunoLibrary) {
         }
 
         override fun onSend() {
-            blunoLibrary.serialSend(Date().toString())
+            val json = "{\"time\":${Date().time / 1000}}"
+            Log.d(TAG, json)
+            blunoLibrary.serialSend(json)
         }
 
         override fun onRefresh() {}
