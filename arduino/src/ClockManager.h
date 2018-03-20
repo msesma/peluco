@@ -4,20 +4,21 @@
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
+#include <time.h>
 
 class Adafruit_PCD8544;
 
-class Clock 
+class ClockManager 
 {
 public:
 
-    Clock(Adafruit_PCD8544 *display);
+    ClockManager(Adafruit_PCD8544 *display);
 
     void clockToScreen();
 
     void updateClock();
 
-    void adjustClock(long epoch);
+    void adjustClock(unsigned long epoch);
 
 private:    
 
@@ -28,6 +29,8 @@ private:
     String dayShortStr(uint8_t day);
 
     String formatDigits(int num);
+
+    int __secs_to_tm(long long t, struct tm *tm);
 
 };
 

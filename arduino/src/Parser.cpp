@@ -6,6 +6,7 @@
 //https://github.com/bblanchon/ArduinoJson
 #include <ArduinoJson.h>
 
+
 class Adafruit_PCD8544;
 
 String logData = "";
@@ -19,10 +20,10 @@ long Parser::onReceive(String json)
 {
     if (json.length() > 0) 
     {
-       logData = json;
        StaticJsonBuffer<200> jsonBuffer;
         JsonObject& root = jsonBuffer.parseObject(json);
-        long time = root["time"];
+        unsigned long time = root["time"];
+        logData = String(time);
         return time;
     }
     return 0;
@@ -34,3 +35,4 @@ void Parser::log()
     displayPtr->setCursor(0,0);
     displayPtr->println(logData);
 }
+
