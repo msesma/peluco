@@ -30,7 +30,17 @@ private:
 
     String formatDigits(int num);
 
-    int __secs_to_tm(long long t, struct tm *tm);
+    void convert(long epoch, struct tm *timeDate);
+
+    long setTime(long epoch, struct tm *timeDate);
+
+    long setYear(long daysRemaining, struct tm *timeDate);
+
+    void setDate(long daysRemaining, struct tm *timeDate);
+
+    void setWeekDay(long days, struct tm *timeDate);
+
+    void setDst(struct tm *timeDate);
 
 };
 

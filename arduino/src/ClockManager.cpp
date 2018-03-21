@@ -3,23 +3,25 @@
 #include "ClockManager.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
-#include <limits.h>
 
 class Adafruit_PCD8544;
 
 //https://en.wikipedia.org/wiki/C_date_and_time_functions
-//time_t     now;
 struct tm  timeDate;
 
 char indicator = ':';
-const int daysOnMonth[12]  ={31,28,31,30,31,30,31,31,30,31,30,31};
+const int daysInMonth[12]   ={31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 const String monthShortNames[12]  = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 const String dayShortNames[7]  = {"Sun","Mon","Tue","Wed","Thr","Fri","Sat"};
+
+#define DAY_SECONDS (86400) //24 * 60 * 60
+#define JAN_1_1972 (365 * 2 * DAY_SECONDS)
+#define JAN_1_1972_WDAY (6)
+#define LEAP_CYCLE_DAYS (365 * 4 + 1)
 
 ClockManager::ClockManager(Adafruit_PCD8544 *display)
 {
     displayPtr = display;
-    timeDate.tm_year = 2018;
 }
 
 void ClockManager::clockToScreen()
@@ -72,7 +74,7 @@ void ClockManager::updateClock()
           timeDate.tm_hour = 0;
           timeDate.tm_wday++;
           if (timeDate.tm_wday == 7) timeDate.tm_wday = 0;
-          uint8_t monthDays = daysOnMonth[timeDate.tm_mon];
+          uint8_t monthDays = daysInMonth[timeDate.tm_mon];
           boolean leap = ( ((timeDate.tm_year)>0) && !((timeDate.tm_year)%4) && ( ((timeDate.tm_year)%100) || !((timeDate.tm_year)%400) ) );
           if (timeDate.tm_mon == 1 && leap) monthDays++;
           timeDate.tm_mday++;  
@@ -97,7 +99,7 @@ void ClockManager::adjustClock(unsigned long epoch)
   //set_system_time(epoch);
 
 
-  __secs_to_tm(epoch, &timeDate);
+  convert(epoch, &timeDate);
 }
 
 String ClockManager::monthShortStr(uint8_t month)
@@ -110,81 +112,89 @@ String ClockManager::dayShortStr(uint8_t day)
    return dayShortNames[day];
 }
 
-/* 2000-03-01 (mod 400 year, immediately after feb29 */
-#define LEAPOCH (946684800LL + 86400*(31+29))
+void ClockManager::convert(long epoch, struct tm *timeDate) {
+        if (epoch < JAN_1_1972) {
+            return;
+        }
+        //move to the first leap year cycle after 1970
+        epoch -= JAN_1_1972;
 
-#define DAYS_PER_400Y (146097) //365 * 400 + 97
-#define DAYS_PER_100Y (36524)  //365 * 100 + 24
-#define DAYS_PER_4Y   (14611)  //365 * 4   + 1
+        long daysRemaining = setTime(epoch, timeDate);
 
-int ClockManager::__secs_to_tm(long long t, struct tm *tm)
-{
-	long long days, secs;
-	int remdays, remsecs, remyears;
-	int qc_cycles, c_cycles, q_cycles;
-	int years, months;
-	int wday, yday, leap;
-	static const char days_in_month[] = {31,30,31,30,31,31,30,31,30,31,31,29};
+        setWeekDay(daysRemaining, timeDate);
 
-	/* Reject time_t values whose year would overflow int */
-	if (t < INT_MIN * 31622400LL || t > INT_MAX * 31622400LL)
-		return -1;
+        daysRemaining = setYear(daysRemaining, timeDate);
 
-	secs = t - LEAPOCH;
-	days = secs / 86400;
-	remsecs = secs % 86400;
-	if (remsecs < 0) {
-		remsecs += 86400;
-		days--;
-	}
+        setDate(daysRemaining, timeDate);
 
-	wday = (3+days)%7;
-	if (wday < 0) wday += 7;
+        setDst(timeDate);
+    }
 
-	qc_cycles = days / DAYS_PER_400Y;
-	remdays = days % DAYS_PER_400Y;
-	if (remdays < 0) {
-		remdays += DAYS_PER_400Y;
-		qc_cycles--;
-	}
+    long ClockManager::setTime(long epoch, struct tm *timeDate) {
+        int timeSeconds = (int) (epoch % DAY_SECONDS);
+        timeDate->tm_hour = timeSeconds / 3600;
+        timeDate->tm_min = (timeSeconds % 3600) / 60;
+        timeDate->tm_sec = (timeSeconds % 3600) % 60;
 
-	c_cycles = remdays / DAYS_PER_100Y;
-	if (c_cycles == 4) c_cycles--;
-	remdays -= c_cycles * DAYS_PER_100Y;
+        return epoch / DAY_SECONDS;
+    }
 
-	q_cycles = remdays / DAYS_PER_4Y;
-	if (q_cycles == 25) q_cycles--;
-	remdays -= q_cycles * DAYS_PER_4Y;
+    long ClockManager::setYear(long daysRemaining, struct tm *timeDate) {
+        // Set the year to 1971 plus the 4 year leap cycles since
+        int leapCycles = (int) (daysRemaining / LEAP_CYCLE_DAYS);
+        timeDate->tm_year = 1971 + leapCycles * 4;
+        daysRemaining = daysRemaining % LEAP_CYCLE_DAYS;
 
-	remyears = remdays / 365;
-	if (remyears == 4) remyears--;
-	remdays -= remyears * 365;
+        // Add the completed years of the current leap cycle
+        if (daysRemaining > 366) {
+            timeDate->tm_year++;
+            daysRemaining -= 366;
+            timeDate->tm_year += daysRemaining / 365 + 1; // Add one for the current year
+            daysRemaining = daysRemaining % 365;
+        }
+        timeDate->tm_yday = (int) ++daysRemaining; //increase in one for today
+        return daysRemaining;
+    }
 
-	leap = !remyears && (q_cycles || !c_cycles);
-	yday = remdays + 31 + 28 + leap;
-	if (yday >= 365+leap) yday -= 365+leap;
+    void ClockManager::setDate(long daysRemaining, struct tm *timeDate) {
+        timeDate->tm_mon = 1;
+        for (int monthDays : daysInMonth) {
+            // February
+            if (monthDays == 28 && timeDate->tm_year % 4 == 0) {
+                monthDays++;
+            }
 
-	years = remyears + 4*q_cycles + 100*c_cycles + 400*qc_cycles;
+            if (daysRemaining > monthDays) {
+                timeDate->tm_mon++;
+                daysRemaining -= monthDays;
+            } else {
+                break;
+            }
+        }
+        timeDate->tm_mday = (int) daysRemaining;
+    }
 
-	for (months=0; days_in_month[months] <= remdays; months++)
-		remdays -= days_in_month[months];
+    void ClockManager::setWeekDay(long days, struct tm *timeDate) {
+        timeDate->tm_wday = (int) (days + JAN_1_1972_WDAY) % 7;
+    }
 
-	if (years+100 > INT_MAX || years+100 < INT_MIN)
-		return -1;
-
-	tm->tm_year = years + 100;
-	tm->tm_mon = months + 2;
-	if (tm->tm_mon >= 12) {
-		tm->tm_mon -=12;
-		tm->tm_year++;
-	}
-	tm->tm_mday = remdays + 1;
-	tm->tm_wday = wday;
-	tm->tm_yday = yday;
-
-	tm->tm_hour = remsecs / 3600;
-	tm->tm_min = remsecs / 60 % 60;
-	tm->tm_sec = remsecs % 60;
-
-	return 0;
-}
+    void ClockManager::setDst(struct tm *timeDate) {
+        //January, february, november and december are out.
+        if (timeDate->tm_mon < 3 || timeDate->tm_mon > 10) {
+            timeDate->tm_isdst = 0;
+            return;
+        }
+        //April to september are in
+        if (timeDate->tm_mon > 3 && timeDate->tm_mon < 11) {
+            timeDate->tm_isdst = 1;
+            return;
+        }
+        int previousSunday = timeDate->tm_mday - timeDate->tm_wday;
+        //In march, we are DST if our previous sunday was on or after the 25th.
+        if (timeDate->tm_mon == 3) {
+            timeDate->tm_isdst = previousSunday >= 25 ? 1 : 0;
+            return;
+        }
+        //In october, we aren´ DST if our previous sunday was on or after the 25th.
+        timeDate->tm_isdst = previousSunday >= 25 ? 0 : 1;
+    }
