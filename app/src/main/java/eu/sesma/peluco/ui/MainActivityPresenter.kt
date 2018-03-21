@@ -25,6 +25,11 @@ constructor(val blunoLibrary: BlunoLibrary) {
         override fun onSend() {
             val json = "{\"time\":${Date().time / 1000}}"
             Log.d(TAG, json)
+
+            val converter = EpochConverter()
+            converter.convert(Date().time / 1000)
+            Log.d(TAG, converter.tm.toString())
+
             blunoLibrary.serialSend(json)
         }
 

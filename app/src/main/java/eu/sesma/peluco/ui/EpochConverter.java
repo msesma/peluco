@@ -12,11 +12,26 @@ public class EpochConverter {
         int tm_wday;        /* day of the week, range 0 to 6    */
         int tm_yday;        /* day in the year, range 0 to 365  */
         int tm_isdst;       /* daylight saving time             */
+
+        @Override
+        public String toString() {
+            return "Tm{" +
+                    "tm_sec=" + tm_sec +
+                    ", tm_min=" + tm_min +
+                    ", tm_hour=" + tm_hour +
+                    ", tm_mday=" + tm_mday +
+                    ", tm_mon=" + tm_mon +
+                    ", tm_year=" + tm_year +
+                    ", tm_wday=" + tm_wday +
+                    ", tm_yday=" + tm_yday +
+                    ", tm_isdst=" + tm_isdst +
+                    '}';
+        }
     }
 
     private final static int[] DAYS_IN_MONTH = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-    private Tm tm = new Tm();
+    public Tm tm = new Tm();
     private final static int DAY_SECONDS = 24 * 60 * 60;
     private final static int JAN_1_1972 = 365 * 2 * DAY_SECONDS;
     private final static int JAN_1_1972_WDAY = 6;
@@ -31,11 +46,11 @@ public class EpochConverter {
 
         long daysRemaining = setTime(epoch, tm);
 
+        setWeekDay(daysRemaining, tm);
+
         daysRemaining = setYear(daysRemaining, tm);
 
         setDate(daysRemaining, tm);
-
-        setWeekDay(epoch, tm);
 
         setDst(tm);
     }
@@ -59,10 +74,10 @@ public class EpochConverter {
         if (daysRemaining > 366) {
             tm.tm_year++;
             daysRemaining -= 366;
-            tm.tm_year += daysRemaining / 365;
+            tm.tm_year += daysRemaining / 365 + 1; // Add one for the current year
             daysRemaining = daysRemaining % 365;
         }
-        tm.tm_yday = (int) daysRemaining;
+        tm.tm_yday = (int) ++daysRemaining; //increase in one for today
         return daysRemaining;
     }
 
@@ -84,8 +99,8 @@ public class EpochConverter {
         tm.tm_mday = (int) daysRemaining;
     }
 
-    private void setWeekDay(long epoch, Tm tm) {
-        tm.tm_wday = (int) (epoch + JAN_1_1972_WDAY) % 7;
+    private void setWeekDay(long days, Tm tm) {
+        tm.tm_wday = (int) (days + JAN_1_1972_WDAY) % 7;
     }
 
     private void setDst(Tm tm) {
