@@ -3,15 +3,13 @@
 #include "ClockManager.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
-//#include <time_impl.h>
 #include <limits.h>
 
 class Adafruit_PCD8544;
 
 //https://en.wikipedia.org/wiki/C_date_and_time_functions
-time_t     now;
+//time_t     now;
 struct tm  timeDate;
-
 
 char indicator = ':';
 const int daysOnMonth[12]  ={31,28,31,30,31,30,31,31,30,31,30,31};
