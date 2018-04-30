@@ -110,7 +110,7 @@ public class EpochConverter {
             return;
         }
         //April to september are in
-        if (tm.tm_mon > 3 && tm.tm_mon < 11) {
+        if (tm.tm_mon > 3 && tm.tm_mon < 10) {
             tm.tm_isdst = 1;
             return;
         }
@@ -120,7 +120,7 @@ public class EpochConverter {
             tm.tm_isdst = previousSunday >= 25 ? 1 : 0;
             return;
         }
-        //In october, we aren´ DST if our previous sunday was on or after the 25th.
+        //In october, we aren't DST if our previous sunday was on or after the 25th.
         tm.tm_isdst = previousSunday >= 25 ? 0 : 1;
     }
 }

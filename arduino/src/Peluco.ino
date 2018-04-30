@@ -22,7 +22,7 @@ void setup()
 {
   initDisplay();
   energy.setInterrupts();
-  clockManager.adjustClock(1521573389); //TODO Remove
+  clockManager.adjustClock(1525110385); //TODO Tm{tm_sec=25, tm_min=46, tm_hour=17, tm_mday=30, tm_mon=4, tm_year=2018, tm_wday=1, tm_yday=120, tm_isdst=1}
   Serial.begin(9600);
 }
 

@@ -19,6 +19,8 @@ const String dayShortNames[7]  = {"Sun","Mon","Tue","Wed","Thr","Fri","Sat"};
 #define JAN_1_1972_WDAY (6)
 #define LEAP_CYCLE_DAYS (365 * 4 + 1)
 
+String debug = "";
+
 ClockManager::ClockManager(Adafruit_PCD8544 *display)
 {
     displayPtr = display;
@@ -26,11 +28,10 @@ ClockManager::ClockManager(Adafruit_PCD8544 *display)
 
 void ClockManager::clockToScreen()
 {
+  //DEBUG
   //displayPtr->setTextSize(1);
   //displayPtr->setCursor(0,0);
-  //displayPtr->print(asctime(&timeDate));
-  //time(&now);
-  //timeDate = *gmtime(&now);
+  //displayPtr->print(debug);
 
   displayPtr->setCursor(6,16);
   displayPtr->setTextSize(2);
@@ -131,7 +132,7 @@ void ClockManager::convert(long epoch, struct tm *timeDate) {
     }
 
     long ClockManager::setTime(long epoch, struct tm *timeDate) {
-        int timeSeconds = (int) (epoch % DAY_SECONDS);
+        long timeSeconds = (long) (epoch % DAY_SECONDS);
         timeDate->tm_hour = timeSeconds / 3600;
         timeDate->tm_min = (timeSeconds % 3600) / 60;
         timeDate->tm_sec = (timeSeconds % 3600) % 60;
@@ -157,7 +158,7 @@ void ClockManager::convert(long epoch, struct tm *timeDate) {
     }
 
     void ClockManager::setDate(long daysRemaining, struct tm *timeDate) {
-        timeDate->tm_mon = 1;
+        timeDate->tm_mon = 0;
         for (int monthDays : daysInMonth) {
             // February
             if (monthDays == 28 && timeDate->tm_year % 4 == 0) {
@@ -185,7 +186,7 @@ void ClockManager::convert(long epoch, struct tm *timeDate) {
             return;
         }
         //April to september are in
-        if (timeDate->tm_mon > 3 && timeDate->tm_mon < 11) {
+        if (timeDate->tm_mon > 3 && timeDate->tm_mon < 10) {
             timeDate->tm_isdst = 1;
             return;
         }
