@@ -10,6 +10,8 @@ interface MainActivityUserInterface {
 
     fun onSerialReceived(text: String)
 
+    fun showData(text: String)
+
     fun showError(error: Exception)
 
     interface Delegate {

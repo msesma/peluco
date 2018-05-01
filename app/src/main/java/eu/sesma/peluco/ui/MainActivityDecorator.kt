@@ -27,8 +27,10 @@ constructor(
     lateinit var toolbar: Toolbar
     @BindView(R.id.buttonScan)
     lateinit var buttonScan: Button
-     @BindView(R.id.serialReceivedText)
+    @BindView(R.id.serialReceivedText)
     lateinit var serialReceivedText: TextView
+    @BindView(R.id.textView)
+    lateinit var dataText: TextView
 
     private var delegate: MainActivityUserInterface.Delegate? = null
     private lateinit var context: Context
@@ -68,13 +70,17 @@ constructor(
     override fun showError(error: Exception) {
     }
 
+    override fun showData(text: String) {
+        dataText.text = text
+    }
+
     @OnClick(R.id.buttonScan)
-    fun onScanClick(){
+    fun onScanClick() {
         delegate?.onScan()
     }
 
     @OnClick(R.id.buttonSerialSend)
-    fun onSendClick(){
+    fun onSendClick() {
         delegate?.onSend()
     }
 
