@@ -113,6 +113,29 @@ String ClockManager::dayShortStr(uint8_t day)
    return dayShortNames[day];
 }
 
+void updateDst(){
+    if(timeDate.tm_isdst) 
+        timeDate.tm_hour++;
+    if (timeDate.tm_hour == 24){
+        timeDate.tm_hour = 0;
+        timeDate.tm_wday++;
+        if (timeDate.tm_wday == 7) timeDate.tm_wday = 0;
+        uint8_t monthDays = daysInMonth[timeDate.tm_mon];
+        boolean leap = ( ((timeDate.tm_year)>0) && !((timeDate.tm_year)%4) && ( ((timeDate.tm_year)%100) || !((timeDate.tm_year)%400) ) );
+        if (timeDate.tm_mon == 1 && leap) monthDays++;
+        timeDate.tm_mday++;  
+        if (timeDate.tm_mday > monthDays){
+        timeDate.tm_mday = 1;
+        timeDate.tm_mon++;
+        if (timeDate.tm_mon == 12){
+            timeDate.tm_mon = 0;
+            timeDate.tm_year++;   
+        }
+        }
+    }
+
+}
+
 void ClockManager::convert(long epoch, struct tm *timeDate) {
         if (epoch < JAN_1_1972) {
             return;
@@ -129,6 +152,7 @@ void ClockManager::convert(long epoch, struct tm *timeDate) {
         setDate(daysRemaining, timeDate);
 
         setDst(timeDate);
+        updateDst();
     }
 
     long ClockManager::setTime(long epoch, struct tm *timeDate) {

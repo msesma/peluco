@@ -23,7 +23,7 @@ long Parser::onReceive(String json)
        StaticJsonBuffer<200> jsonBuffer;
         JsonObject& root = jsonBuffer.parseObject(json);
         unsigned long time = root["time"];
-        logData = String(time);
+        logData = json;
         return time;
     }
     return 0;

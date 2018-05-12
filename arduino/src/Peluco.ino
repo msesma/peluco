@@ -32,12 +32,11 @@ void loop()
   if (Serial.available())
   {  
     String json = Serial.readString();
-    //Serial.print(data);
     unsigned long time = parser.onReceive(json);
     if (time !=0 )
       clockManager.adjustClock(time);
   }
-  parser.log();
+  //parser.log();
   clockManager.clockToScreen();
   display.display();
   energy.sleepNow();

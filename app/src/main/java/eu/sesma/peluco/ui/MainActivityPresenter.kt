@@ -3,6 +3,7 @@ package eu.sesma.peluco.ui
 import android.content.Intent
 import android.util.Log
 import eu.sesma.peluco.bt.BlunoLibrary
+import org.json.JSONObject
 import java.util.*
 import javax.inject.Inject
 
@@ -12,7 +13,7 @@ constructor(val blunoLibrary: BlunoLibrary) {
 
     companion object {
         private val TAG = MainActivityPresenter::class.simpleName
-        private const val BAUDRATE = 9600
+        private const val BAUDRATE = 19200
     }
 
     private var decorator: MainActivityUserInterface? = null
@@ -30,12 +31,17 @@ constructor(val blunoLibrary: BlunoLibrary) {
     }
 
     private fun MainActivityPresenter.sendData() {
-        val json = "{\"time\":${Date().time / 1000}}"
+        val json = JSONObject(mapOf(
+                "bugfix" to "12345678901234567890", //For a unknown reason the character 17 is lost in transmission, so this is a workaround until I find the issue
+                "time" to Date().time / 1000
+        )).toString(0)
+        //val json = "{\"time\":${Date().time / 1000}}"
+        //val json = "1234567890123456789012345678901234567890"
         Log.d(TAG, json)
 
         val converter = EpochConverter()
         converter.convert(Date().time / 1000)
-        decorator?.showData(json + " "+ converter.tm.toString())
+        decorator?.showData(json + " " + converter.tm.toString())
         Log.d(TAG, converter.tm.toString())
 
         blunoLibrary.serialSend(json)
