@@ -22,7 +22,7 @@ void setup()
 {
   initDisplay();
   energy.setInterrupts();
-  clockManager.adjustClock(1525110385); //TODO Tm{tm_sec=25, tm_min=46, tm_hour=17, tm_mday=30, tm_mon=4, tm_year=2018, tm_wday=1, tm_yday=120, tm_isdst=1}
+  clockManager.adjustClock(1525110385);
   Serial.begin(9600);
 }
 
@@ -36,8 +36,9 @@ void loop()
     if (time !=0 )
       clockManager.adjustClock(time);
   }
-  //parser.log();
   clockManager.clockToScreen();
+  //parser.log();
+  //clockManager.log();
   display.display();
   energy.sleepNow();
 }

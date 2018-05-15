@@ -20,6 +20,8 @@ public:
 
     void adjustClock(unsigned long epoch);
 
+    void log();
+
 private:    
 
     Adafruit_PCD8544 *displayPtr;
@@ -41,6 +43,8 @@ private:
     void setWeekDay(long days, struct tm *timeDate);
 
     void setDst(struct tm *timeDate);
+
+    void setCalendar();
 
 };
 

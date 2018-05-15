@@ -19,20 +19,22 @@ const String dayShortNames[7]  = {"Sun","Mon","Tue","Wed","Thr","Fri","Sat"};
 #define JAN_1_1972_WDAY (6)
 #define LEAP_CYCLE_DAYS (365 * 4 + 1)
 
-String debug = "";
+String logClockData = "";
 
 ClockManager::ClockManager(Adafruit_PCD8544 *display)
 {
     displayPtr = display;
 }
 
+void ClockManager::log()
+{
+    displayPtr->setTextSize(1);
+    displayPtr->setCursor(0,0);
+    displayPtr->println(logClockData);
+}
+
 void ClockManager::clockToScreen()
 {
-  //DEBUG
-  //displayPtr->setTextSize(1);
-  //displayPtr->setCursor(0,0);
-  //displayPtr->print(debug);
-
   displayPtr->setCursor(6,16);
   displayPtr->setTextSize(2);
   displayPtr->print(formatDigits(timeDate.tm_hour));
@@ -59,7 +61,6 @@ void ClockManager::updateClock()
 {
   if (indicator == ':')
   {
-    //system_tick();
     indicator = ' ';
   }
   else{
@@ -71,23 +72,7 @@ void ClockManager::updateClock()
       if (timeDate.tm_min == 60){
         timeDate.tm_min = 0;
         timeDate.tm_hour++;
-        if (timeDate.tm_hour == 24){
-          timeDate.tm_hour = 0;
-          timeDate.tm_wday++;
-          if (timeDate.tm_wday == 7) timeDate.tm_wday = 0;
-          uint8_t monthDays = daysInMonth[timeDate.tm_mon];
-          boolean leap = ( ((timeDate.tm_year)>0) && !((timeDate.tm_year)%4) && ( ((timeDate.tm_year)%100) || !((timeDate.tm_year)%400) ) );
-          if (timeDate.tm_mon == 1 && leap) monthDays++;
-          timeDate.tm_mday++;  
-          if (timeDate.tm_mday > monthDays){
-            timeDate.tm_mday = 1;
-            timeDate.tm_mon++;
-            if (timeDate.tm_mon == 12){
-              timeDate.tm_mon = 0;
-              timeDate.tm_year++;   
-            }
-          }
-        }
+        setCalendar();
       }
     }
   }
@@ -95,11 +80,6 @@ void ClockManager::updateClock()
 
 void ClockManager::adjustClock(unsigned long epoch)
 {
-  //now = epoch;
-  //timeDate = *gmtime(&now);
-  //set_system_time(epoch);
-
-
   convert(epoch, &timeDate);
 }
 
@@ -113,27 +93,24 @@ String ClockManager::dayShortStr(uint8_t day)
    return dayShortNames[day];
 }
 
-void updateDst(){
-    if(timeDate.tm_isdst) 
-        timeDate.tm_hour++;
+void ClockManager::setCalendar(){
     if (timeDate.tm_hour == 24){
-        timeDate.tm_hour = 0;
-        timeDate.tm_wday++;
-        if (timeDate.tm_wday == 7) timeDate.tm_wday = 0;
-        uint8_t monthDays = daysInMonth[timeDate.tm_mon];
-        boolean leap = ( ((timeDate.tm_year)>0) && !((timeDate.tm_year)%4) && ( ((timeDate.tm_year)%100) || !((timeDate.tm_year)%400) ) );
-        if (timeDate.tm_mon == 1 && leap) monthDays++;
-        timeDate.tm_mday++;  
-        if (timeDate.tm_mday > monthDays){
-        timeDate.tm_mday = 1;
-        timeDate.tm_mon++;
-        if (timeDate.tm_mon == 12){
-            timeDate.tm_mon = 0;
-            timeDate.tm_year++;   
-        }
+            timeDate.tm_hour = 0;
+            timeDate.tm_wday++;
+            if (timeDate.tm_wday == 7) timeDate.tm_wday = 0;
+            uint8_t monthDays = daysInMonth[timeDate.tm_mon];
+            boolean leap = ( ((timeDate.tm_year)>0) && !((timeDate.tm_year)%4) && ( ((timeDate.tm_year)%100) || !((timeDate.tm_year)%400) ) );
+            if (timeDate.tm_mon == 1 && leap) monthDays++;
+            timeDate.tm_mday++;  
+            if (timeDate.tm_mday > monthDays){
+            timeDate.tm_mday = 1;
+            timeDate.tm_mon++;
+            if (timeDate.tm_mon == 12){
+                timeDate.tm_mon = 0;
+                timeDate.tm_year++;   
+            }
         }
     }
-
 }
 
 void ClockManager::convert(long epoch, struct tm *timeDate) {
@@ -152,7 +129,6 @@ void ClockManager::convert(long epoch, struct tm *timeDate) {
         setDate(daysRemaining, timeDate);
 
         setDst(timeDate);
-        updateDst();
     }
 
     long ClockManager::setTime(long epoch, struct tm *timeDate) {
@@ -222,4 +198,9 @@ void ClockManager::convert(long epoch, struct tm *timeDate) {
         }
         //In october, we aren´ DST if our previous sunday was on or after the 25th.
         timeDate->tm_isdst = previousSunday >= 25 ? 0 : 1;
+
+        if(timeDate->tm_isdst) {
+           timeDate->tm_hour++;
+           setCalendar(); 
+        }
     }
