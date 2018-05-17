@@ -42,12 +42,12 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$dagger"
     implementation "com.google.dagger:dagger:$dagger"
 
-    testCompile "junit:junit:$junit"
-    testCompile("com.squareup.assertj:assertj-android:$assertj") {
+    testImplementation "junit:junit:$junit"
+    testImplementation("com.squareup.assertj:assertj-android:$assertj") {
         exclude module: 'support-annotations'
     }
-    testCompile "org.mockito:mockito-core:$mockito"
-    testCompile("com.nhaarman:mockito-kotlin-kt1.1:$mockito_kotlin") {
+    testImplementation "org.mockito:mockito-core:$mockito"
+    testImplementation("com.nhaarman:mockito-kotlin-kt1.1:$mockito_kotlin") {
         exclude module: 'kotlin-reflect'
         exclude module: 'kotlin-stdlib'
     }
