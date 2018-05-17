@@ -35,15 +35,7 @@ constructor(val blunoLibrary: BlunoLibrary) {
                 "bugfix" to "12345678901234567890", //For a unknown reason the character 17 is lost in transmission, so this is a workaround until I find the issue
                 "time" to Date().time / 1000
         )).toString(0)
-        //val json = "{\"time\":${Date().time / 1000}}"
-        //val json = "1234567890123456789012345678901234567890"
         Log.d(TAG, json)
-
-        val converter = EpochConverter()
-        converter.convert(Date().time / 1000)
-        decorator?.showData(json + " " + converter.tm.toString())
-        Log.d(TAG, converter.tm.toString())
-
         blunoLibrary.serialSend(json)
     }
 
