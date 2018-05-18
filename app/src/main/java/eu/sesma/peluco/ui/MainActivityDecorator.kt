@@ -11,8 +11,8 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import eu.sesma.peluco.R
-import eu.sesma.peluco.bt.BlunoLibrary
-import eu.sesma.peluco.bt.BlunoLibrary.connectionStateEnum.*
+import eu.sesma.peluco.bt.ConnectionState
+import eu.sesma.peluco.bt.ConnectionState.*
 import javax.inject.Inject
 
 class MainActivityDecorator
@@ -50,13 +50,13 @@ constructor(
         toolbar.title = ""
     }
 
-    override fun onConnectionStateChange(connectionStateEnum: BlunoLibrary.connectionStateEnum) {
+    override fun onConnectionStateChange(connectionStateEnum: ConnectionState) {
         buttonScan.text = when (connectionStateEnum) {
-            isConnected -> context.getString(R.string.connected)
-            isConnecting -> context.getString(R.string.connecting)
-            isToScan -> context.getString(R.string.scan)
-            isScanning -> context.getString(R.string.scanning)
-            isDisconnecting -> context.getString(R.string.disconnecting)
+            CONNECTED -> context.getString(R.string.connected)
+            CONNECTING -> context.getString(R.string.connecting)
+            TO_SCAN -> context.getString(R.string.scan)
+            SCANNING -> context.getString(R.string.scanning)
+            DISCONNECTING -> context.getString(R.string.disconnecting)
             else -> ""
         }
     }

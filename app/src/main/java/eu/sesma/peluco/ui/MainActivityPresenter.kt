@@ -3,6 +3,7 @@ package eu.sesma.peluco.ui
 import android.content.Intent
 import android.util.Log
 import eu.sesma.peluco.bt.BlunoLibrary
+import eu.sesma.peluco.bt.ConnectionState
 import org.json.JSONObject
 import java.util.*
 import javax.inject.Inject
@@ -68,7 +69,7 @@ constructor(val blunoLibrary: BlunoLibrary) {
         blunoLibrary.onActivityResultProcess(requestCode, resultCode, data)
     }
 
-    fun onConnectionStateChange(connectionStateEnum: BlunoLibrary.connectionStateEnum) {
+    fun onConnectionStateChange(connectionStateEnum: ConnectionState) {
         decorator?.onConnectionStateChange(connectionStateEnum)
     }
 

@@ -10,11 +10,10 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import eu.sesma.peluco.R
-import eu.sesma.peluco.bt.BlunoLibrary
 import eu.sesma.peluco.bt.ConnectionListener
+import eu.sesma.peluco.bt.ConnectionState
 import eu.sesma.peluco.platform.BaseActivity
 import javax.inject.Inject
-
 
 
 class MainActivity : BaseActivity(), ConnectionListener {
@@ -76,7 +75,7 @@ class MainActivity : BaseActivity(), ConnectionListener {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onConnectionStateChange(connectionStateEnum: BlunoLibrary.connectionStateEnum) {
+    override fun onConnectionStateChange(connectionStateEnum: ConnectionState) {
         presenter.onConnectionStateChange(connectionStateEnum)
     }
 

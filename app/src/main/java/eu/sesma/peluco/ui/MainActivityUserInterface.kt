@@ -1,12 +1,12 @@
 package eu.sesma.peluco.ui
 
-import eu.sesma.peluco.bt.BlunoLibrary
+import eu.sesma.peluco.bt.ConnectionState
 
 interface MainActivityUserInterface {
 
     fun initialize(delegate: Delegate)
 
-    fun onConnectionStateChange(connectionStateEnum: BlunoLibrary.connectionStateEnum)
+    fun onConnectionStateChange(connectionStateEnum: ConnectionState)
 
     fun onSerialReceived(text: String)
 
