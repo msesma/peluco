@@ -113,94 +113,94 @@ void ClockManager::setCalendar(){
     }
 }
 
-void ClockManager::convert(long epoch, struct tm *timeDate) {
+void ClockManager::convert(long epoch, struct tm *timeDatePtr) {
         if (epoch < JAN_1_1972) {
             return;
         }
         //move to the first leap year cycle after 1970
         epoch -= JAN_1_1972;
 
-        long daysRemaining = setTime(epoch, timeDate);
+        long daysRemaining = setTime(epoch, timeDatePtr);
 
-        setWeekDay(daysRemaining, timeDate);
+        setWeekDay(daysRemaining, timeDatePtr);
 
-        daysRemaining = setYear(daysRemaining, timeDate);
+        daysRemaining = setYear(daysRemaining, timeDatePtr);
 
-        setDate(daysRemaining, timeDate);
+        setDate(daysRemaining, timeDatePtr);
 
-        setDst(timeDate);
+        setDst(timeDatePtr);
+
+        if(timeDatePtr->tm_isdst) {
+           timeDatePtr->tm_hour++;
+           setCalendar(); 
+        }
     }
 
-    long ClockManager::setTime(long epoch, struct tm *timeDate) {
+    long ClockManager::setTime(long epoch, struct tm *timeDatePtr) {
         long timeSeconds = (long) (epoch % DAY_SECONDS);
-        timeDate->tm_hour = timeSeconds / 3600;
-        timeDate->tm_min = (timeSeconds % 3600) / 60;
-        timeDate->tm_sec = (timeSeconds % 3600) % 60;
+        timeDatePtr->tm_hour = timeSeconds / 3600;
+        timeDatePtr->tm_min = (timeSeconds % 3600) / 60;
+        timeDatePtr->tm_sec = (timeSeconds % 3600) % 60;
 
         return epoch / DAY_SECONDS;
     }
 
-    long ClockManager::setYear(long daysRemaining, struct tm *timeDate) {
+    long ClockManager::setYear(long daysRemaining, struct tm *timeDatePtr) {
         // Set the year to 1971 plus the 4 year leap cycles since
         int leapCycles = (int) (daysRemaining / LEAP_CYCLE_DAYS);
-        timeDate->tm_year = 1971 + leapCycles * 4;
+        timeDatePtr->tm_year = 1971 + leapCycles * 4;
         daysRemaining = daysRemaining % LEAP_CYCLE_DAYS;
 
         // Add the completed years of the current leap cycle
         if (daysRemaining > 366) {
-            timeDate->tm_year++;
+            timeDatePtr->tm_year++;
             daysRemaining -= 366;
-            timeDate->tm_year += daysRemaining / 365 + 1; // Add one for the current year
+            timeDatePtr->tm_year += daysRemaining / 365 + 1; // Add one for the current year
             daysRemaining = daysRemaining % 365;
         }
-        timeDate->tm_yday = (int) ++daysRemaining; //increase in one for today
+        timeDatePtr->tm_yday = (int) ++daysRemaining; //increase in one for today
         return daysRemaining;
     }
 
-    void ClockManager::setDate(long daysRemaining, struct tm *timeDate) {
-        timeDate->tm_mon = 0;
+    void ClockManager::setDate(long daysRemaining, struct tm *timeDatePtr) {
+        timeDatePtr->tm_mon = 0;
         for (int monthDays : daysInMonth) {
             // February
-            if (monthDays == 28 && timeDate->tm_year % 4 == 0) {
+            if (monthDays == 28 && timeDatePtr->tm_year % 4 == 0) {
                 monthDays++;
             }
 
             if (daysRemaining > monthDays) {
-                timeDate->tm_mon++;
+                timeDatePtr->tm_mon++;
                 daysRemaining -= monthDays;
             } else {
                 break;
             }
         }
-        timeDate->tm_mday = (int) daysRemaining;
+        timeDatePtr->tm_mday = (int) daysRemaining;
     }
 
-    void ClockManager::setWeekDay(long days, struct tm *timeDate) {
-        timeDate->tm_wday = (int) (days + JAN_1_1972_WDAY) % 7;
+    void ClockManager::setWeekDay(long days, struct tm *timeDatePtr) {
+        timeDatePtr->tm_wday = (int) (days + JAN_1_1972_WDAY) % 7;
     }
 
-    void ClockManager::setDst(struct tm *timeDate) {
+    void ClockManager::setDst(struct tm *timeDatePtr) {
         //January, february, november and december are out.
-        if (timeDate->tm_mon < 3 || timeDate->tm_mon > 10) {
-            timeDate->tm_isdst = 0;
+        if (timeDatePtr->tm_mon < 3 || timeDatePtr->tm_mon > 10) {
+            timeDatePtr->tm_isdst = 0;
             return;
         }
         //April to september are in
-        if (timeDate->tm_mon > 3 && timeDate->tm_mon < 10) {
-            timeDate->tm_isdst = 1;
+        if (timeDatePtr->tm_mon > 3 && timeDatePtr->tm_mon < 10) {
+            timeDatePtr->tm_isdst = 1;
             return;
         }
-        int previousSunday = timeDate->tm_mday - timeDate->tm_wday;
+        int previousSunday = timeDatePtr->tm_mday - timeDatePtr->tm_wday;
         //In march, we are DST if our previous sunday was on or after the 25th.
-        if (timeDate->tm_mon == 3) {
-            timeDate->tm_isdst = previousSunday >= 25 ? 1 : 0;
+        if (timeDatePtr->tm_mon == 3) {
+            timeDatePtr->tm_isdst = previousSunday >= 25 ? 1 : 0;
             return;
         }
         //In october, we aren´ DST if our previous sunday was on or after the 25th.
-        timeDate->tm_isdst = previousSunday >= 25 ? 0 : 1;
-
-        if(timeDate->tm_isdst) {
-           timeDate->tm_hour++;
-           setCalendar(); 
-        }
+        timeDatePtr->tm_isdst = previousSunday >= 25 ? 0 : 1;
     }
