@@ -32,9 +32,16 @@ void loop()
   if (Serial.available())
   {  
     String json = Serial.readString();
+    Serial.print(json);//send what has been received for testing
+    Serial.println();   //print line feed character
     unsigned long time = parser.onReceive(json);
-    if (time !=0 )
-      clockManager.adjustClock(time);
+    Serial.print("Time: " + String(time));//send parsed time for testing
+    Serial.println();   //print line feed character
+    if (time !=0 ) {
+      String decodeTime = clockManager.adjustClock(time);
+      Serial.print("Time decoded: " + decodeTime);//send decoded time for testing
+      Serial.println();   //print line feed character
+    }
   }
   clockManager.clockToScreen();
   //parser.log();

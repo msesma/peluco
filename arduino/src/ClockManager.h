@@ -18,7 +18,7 @@ public:
 
     void updateClock();
 
-    void adjustClock(unsigned long epoch);
+    String adjustClock(unsigned long epoch);
 
     void log();
 

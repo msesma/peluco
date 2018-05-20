@@ -78,9 +78,10 @@ void ClockManager::updateClock()
   }
 }
 
-void ClockManager::adjustClock(unsigned long epoch)
+String ClockManager::adjustClock(unsigned long epoch)
 {
   convert(epoch, &timeDate);
+  return formatDigits(timeDate.tm_hour)+indicator+formatDigits(timeDate.tm_min);
 }
 
 String ClockManager::monthShortStr(uint8_t month)

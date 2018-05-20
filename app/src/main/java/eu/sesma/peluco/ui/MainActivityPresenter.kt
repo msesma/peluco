@@ -33,7 +33,7 @@ constructor(val blunoLibrary: BlunoLibrary) {
 
     private fun MainActivityPresenter.sendData() {
         val json = JSONObject(mapOf(
-                "bugfix" to "12345678901234567890", //For a unknown reason the character 17 is lost in transmission, so this is a workaround until I find the issue
+                "bugfix" to "1234567890", //For a unknown reason the character 17 (4) is lost in transmission, so this is a workaround until I find the issue
                 "time" to Date().time / 1000
         )).toString(0)
         Log.d(TAG, json)
