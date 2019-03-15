@@ -2,7 +2,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 #include "ClockManager.h"
-#include "Energy.h"
+// #include "Energy.h"
 #include "Parser.h"
 
 //Peluco Beetle BLE
