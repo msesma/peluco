@@ -1,10 +1,9 @@
 package eu.sesma.peluco.platform
 
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import eu.sesma.peluco.injection.PerActivity
+import androidx.appcompat.app.AppCompatActivity
 import dagger.Module
 import dagger.Provides
+import eu.sesma.peluco.injection.PerActivity
 
 @Module
 class ActivityModule(private val activity: AppCompatActivity) {

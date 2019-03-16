@@ -1,13 +1,12 @@
 package eu.sesma.peluco.bt
 
 import android.bluetooth.BluetoothDevice
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import eu.sesma.peluco.R
 
 
-class LeDeviceListAdapter(val listener: ClickListener) : RecyclerView.Adapter<LeViewHolder>() {
+class LeDeviceListAdapter(val listener: ClickListener) : androidx.recyclerview.widget.RecyclerView.Adapter<LeViewHolder>() {
 
     private val leDevices: MutableList<BluetoothDevice> = mutableListOf()
 

@@ -11,9 +11,9 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.IBinder
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import eu.sesma.peluco.R
 import eu.sesma.peluco.bt.ConnectionState.*
 import java.util.*

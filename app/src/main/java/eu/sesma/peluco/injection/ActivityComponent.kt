@@ -1,6 +1,6 @@
 package eu.sesma.peluco.injection
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import dagger.Component
 import eu.sesma.peluco.platform.ActivityModule
 import eu.sesma.peluco.ui.MainActivity

@@ -2,8 +2,8 @@ package eu.sesma.peluco.platform
 
 import android.app.Activity
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import eu.sesma.peluco.injection.ActivityComponent
 import eu.sesma.peluco.injection.ApplicationComponent
 import eu.sesma.peluco.injection.DaggerActivityComponent
